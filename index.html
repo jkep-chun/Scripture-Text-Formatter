@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Scripture Formatter</title>
+  <link rel="icon" type="image/png" href="jkep_chun_favicon.png">
   <style>
     body {
       font-family: system-ui, -apple-system, sans-serif;
@@ -57,22 +58,103 @@
   
   <div>
     <button onclick="copyOutput()">Copy Output</button>
+    <button id="impliedText" onclick="toggleImpliedText()">Toggle Implied Text (NASB/LSB)</button>
   </div>
 
   <script>
-    document.getElementById('input').addEventListener('input', formatText);
+    let impliedTextEnabled = false;
+
+    const input = document.getElementById('input');
+    input.addEventListener('input', formatText);
+    input.addEventListener('paste', function(event) {
+      event.preventDefault();
+
+      const clipboardData = event.clipboardData || window.clipboardData;
+      const htmlData = clipboardData.getData('text/html');
+      const textData = clipboardData.getData('text/plain');
+
+      if (htmlData) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlData, 'text/html');
+        const body = doc.body;
+
+        cleanElement(body);
+        let cleanHTML = body.innerHTML;
+        cleanHTML = cleanHTML.replace(/<!--[\s\S]*?-->/g, "");
+        this.value = cleanHTML.trim();
+      } else {
+        this.value = textData;
+      }
+      formatText();
+    });
+
+    // Recursive cleaning function
+    function cleanElement(element) {
+      // List of allowed structural text tags you want to keep
+      const allowedTags = ['I', 'BR'];
+
+      // Loop backward through child nodes so index shifts don't break the loop
+      for (let i = element.childNodes.length - 1; i >= 0; i--) {
+        const child = element.childNodes[i];
+
+        if (child.nodeType === Node.ELEMENT_NODE) {
+          // If it is a tag we want to keep, strip its attributes (style, class, etc)
+          if (allowedTags.includes(child.tagName)) {
+            while (child.attributes.length > 0) {
+                child.removeAttribute(child.attributes[0].name);
+            }
+            // Continue deeper into the tree
+            cleanElement(child);
+          } else {
+            // For wrapper tags like <html>, <body>, or unneeded divs, 
+            // unwrap them by replacing the tag with its internal contents
+            cleanElement(child);
+            while (child.firstChild) {
+                element.insertBefore(child.firstChild, child);
+            }
+            element.removeChild(child);
+          }
+          }
+        }
+      }
 
     function formatText() {
       const input = document.getElementById('input').value;
       const paragraphs = input.trim().split(/\r?\n/).map(p => p.trim()).filter(Boolean);
 
       const formatted = paragraphs.map(p => {
-        // Replace leading verse number, regardless of whether it's followed by a space or not, with superscript
+        // Replacements
+        // Spaces
+        p = p.replace(/(\d[,.;:?!<>])([a-zA-Z])}/g, '$1 $2')
+        // Interior verse numbers adjacent to nonnumber character
+        p = p.replace(/(?<=[.,;:<>])(\d+)\s*/g, '\n<sup>$1</sup> ');
+        // Leading <br>
+        p = p.replace(/^\s*<br>\s*/, '1');
+        // Leading verse number
         p = p.replace(/^(\d+)\s*/, '<sup>$1</sup> ');
         // Also replace interior verse numbers with newline + superscript
         p = p.replace(/\s+(\d+)\s*/g, '\n<sup>$1</sup> ');
-        // Append paragraph breaks
-        return p + ' <br><br>';
+        // Replace &nbsp; verse numbers with superscript
+        p = p.replace(/&nbsp;(\d+)/g, '<sup>$1</sup>');
+        p = p.replace(/&nbsp;/g, ' ');
+        // Convert double spaces to single spaces
+        p = p.replace(/ {2,}/g, ' ');
+        // Double up on paragraph-dividing <br>
+        p = p.replace(/<br\s*\/?>/gi, '<br><br>');
+        // Empty <i></i> tags
+        p = p.replace(/<i><\/i>/g, '<br>');
+        p = p.replace(/\s<br>/g, ' ');
+        // Remove trailing whitespace
+        p = p.trim();
+        // Remove any remaining [a-zA-Z] tags
+        p = p.replace(/\[[a-zA-Z]\]/g, '');
+        
+        // If implied text is disabled, remove <i> tags
+        if (!impliedTextEnabled) {
+          p = p.replace(/<i>(.*?)<\/i>/g, '$1');
+        }
+
+        return p;
       });
 
       document.getElementById('output').value = formatted.join('\n');
@@ -82,6 +164,11 @@
       const output = document.getElementById('output');
       output.select();
       navigator.clipboard.writeText(output.value);
+    }
+
+    function toggleImpliedText() {
+      impliedTextEnabled = !impliedTextEnabled;
+      formatText();
     }
   </script>
 
