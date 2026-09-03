@@ -2,7 +2,7 @@
 
 ---
 
-This program is used in conjunction with Anki and the Lyris/Poetry Cloze Generator add-on to facilitate bulk creation of Bible verse flash cards.
+This program is used in conjunction with Anki and the Lyrics/Poetry Cloze Generator add-on to facilitate bulk creation of Bible verse flash cards.
 
 ## Instructions
 
@@ -47,3 +47,7 @@ This program is used in conjunction with Anki and the Lyris/Poetry Cloze Generat
   if (match) document.getElementById('num').textContent = match[0];
 </script>
 ```
+
+---
+
+Inspired by [this video](https://youtu.be/Qw6qepQgLi4?si=T6t89X2SFOFOQW1i) (Thanks Nathan!)

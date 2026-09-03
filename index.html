@@ -24,7 +24,7 @@
       margin-bottom: 12px;
     }
     button {
-      background-color: #2563eb;
+      background-color: #64748b;
       color: white;
       border: none;
       padding: 10px 18px;
@@ -35,12 +35,6 @@
       margin-right: 8px;
     }
     button:hover {
-      background-color: #1d4ed8;
-    }
-    button.secondary {
-      background-color: #64748b;
-    }
-    button.secondary:hover {
       background-color: #475569;
     }
     .label {
@@ -52,19 +46,22 @@
 <body>
 
   <h2>Scripture Formatter</h2>
+
+  <p>This tool formats Scripture copied from web Bibles to be suitable for import into Anki's Lyrics/Poetry Cloze Generator. For more information, consult the <a href="https://github.com/jkep-chun/Scripture-Text-Formatter/blob/main/README.md">README.md</a></p>
   
-  <div class="label">Paste raw text:</div>
+  <div class="label">Paste raw text (from literalword.com, bible.com, etc.):</div>
   <textarea id="input" placeholder="Paste unformatted verses here..."></textarea>
   
-  <div>
-    <button onclick="formatText()">Format</button>
-    <button class="secondary" onclick="copyOutput()">Copy Output</button>
-  </div>
-
   <div class="label" style="margin-top: 24px;">Output:</div>
   <textarea id="output" readonly placeholder="Formatted output will appear here..."></textarea>
+  
+  <div>
+    <button onclick="copyOutput()">Copy Output</button>
+  </div>
 
   <script>
+    document.getElementById('input').addEventListener('input', formatText);
+
     function formatText() {
       const input = document.getElementById('input').value;
       const paragraphs = input.trim().split(/\r?\n/).map(p => p.trim()).filter(Boolean);
