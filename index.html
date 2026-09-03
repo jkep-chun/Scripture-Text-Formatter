@@ -70,10 +70,10 @@
       const paragraphs = input.trim().split(/\r?\n/).map(p => p.trim()).filter(Boolean);
 
       const formatted = paragraphs.map(p => {
-        // Replace leading verse number
-        p = p.replace(/^(\d+)\s+/, '<sup>$1</sup> ');
-        // Replace interior verse numbers with newline + superscript
-        p = p.replace(/\s+(\d+)\s+/g, '\n<sup>$1</sup> ');
+        // Replace leading verse number, regardless of whether it's followed by a space or not, with superscript
+        p = p.replace(/^(\d+)\s*/, '<sup>$1</sup> ');
+        // Also replace interior verse numbers with newline + superscript
+        p = p.replace(/\s+(\d+)\s*/g, '\n<sup>$1</sup> ');
         // Append paragraph breaks
         return p + ' <br><br>';
       });
