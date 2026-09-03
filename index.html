@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scripture Formatter</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 0 20px;
+      color: #222;
+    }
+    textarea {
+      width: 100%;
+      height: 180px;
+      box-sizing: border-box;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    button {
+      background-color: #2563eb;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+    button:hover {
+      background-color: #1d4ed8;
+    }
+    button.secondary {
+      background-color: #64748b;
+    }
+    button.secondary:hover {
+      background-color: #475569;
+    }
+    .label {
+      font-weight: bold;
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Scripture Formatter</h2>
+  
+  <div class="label">Paste raw text:</div>
+  <textarea id="input" placeholder="Paste unformatted verses here..."></textarea>
+  
+  <div>
+    <button onclick="formatText()">Format</button>
+    <button class="secondary" onclick="copyOutput()">Copy Output</button>
+  </div>
+
+  <div class="label" style="margin-top: 24px;">Output:</div>
+  <textarea id="output" readonly placeholder="Formatted output will appear here..."></textarea>
+
+  <script>
+    function formatText() {
+      const input = document.getElementById('input').value;
+      const paragraphs = input.trim().split(/\r?\n/).map(p => p.trim()).filter(Boolean);
+
+      const formatted = paragraphs.map(p => {
+        // Replace leading verse number
+        p = p.replace(/^(\d+)\s+/, '<sup>$1</sup> ');
+        // Replace interior verse numbers with newline + superscript
+        p = p.replace(/\s+(\d+)\s+/g, '\n<sup>$1</sup> ');
+        // Append paragraph breaks
+        return p + ' <br><br>';
+      });
+
+      document.getElementById('output').value = formatted.join('\n');
+    }
+
+    function copyOutput() {
+      const output = document.getElementById('output');
+      output.select();
+      navigator.clipboard.writeText(output.value);
+    }
+  </script>
+
+</body>
+</html>
